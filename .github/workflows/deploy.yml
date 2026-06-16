@@ -13,6 +13,7 @@ concurrency:
 env:
   DEPLOY_PATH: rizyktechno
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+  SSH_OPTS: -o ServerAliveInterval=30 -o ServerAliveCountMax=10
 
 jobs:
   ci:
@@ -81,7 +82,7 @@ jobs:
 
       - name: Prepare deploy directory
         run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+          ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "mkdir -p '${{ env.DEPLOY_PATH }}'"
 
       - name: Upload project
@@ -95,12 +96,12 @@ jobs:
             --exclude='.env' \
             --exclude='.env.production' \
             --exclude='public/uploads/*' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
+            -e "ssh $SSH_OPTS -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
             ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/"
 
       - name: Write production env on VPS
         run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+          ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
             set -e
             cd '${{ env.DEPLOY_PATH }}'
             cat > .env.production << 'ENVEOF'
@@ -124,7 +125,7 @@ jobs:
 
       - name: Deploy with Docker Compose
         run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+          ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
             set -e
             cd '${{ env.DEPLOY_PATH }}'
             docker compose pull postgres caddy || true

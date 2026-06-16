@@ -60,7 +60,7 @@ The first four secrets are for SSH access. The remaining three are required for 
 Optional secrets:
 
 - `ADMIN_EMAIL` defaults to `Armaw-91.91@mail.ru`
-- `CLIENT_ORIGIN` defaults to `http://VPS_HOST,https://VPS_HOST`
+- `CLIENT_ORIGIN` defaults to `http://VPS_HOST,https://VPS_HOST`; for this project use `https://technomarkets.kz,http://technomarkets.kz,https://www.technomarkets.kz,http://www.technomarkets.kz`
 
 Deploy runs automatically on every push to `main`, and can also be started manually from GitHub Actions.
 

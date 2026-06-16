@@ -13,7 +13,7 @@ concurrency:
 env:
   DEPLOY_PATH: rizyktechno
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
-  SSH_OPTS: -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10
+  SSH_OPTS: -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=30 -o ServerAliveCountMax=10
 
 jobs:
   ci:
@@ -82,26 +82,37 @@ jobs:
 
       - name: Prepare deploy directory
         run: |
-          ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "mkdir -p '${{ env.DEPLOY_PATH }}'"
+          for attempt in 1 2 3; do
+            ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+              "mkdir -p '${{ env.DEPLOY_PATH }}'" && exit 0
+            echo "SSH prepare attempt ${attempt} failed; retrying..."
+            sleep 20
+          done
+          exit 1
 
       - name: Upload project
         run: |
-          rsync -az --delete \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='node_modules' \
-            --exclude='dist' \
-            --exclude='dist-server' \
-            --exclude='.env' \
-            --exclude='.env.production' \
-            --exclude='public/uploads/*' \
-            -e "ssh $SSH_OPTS -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
-            ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/"
+          for attempt in 1 2 3; do
+            rsync -az --delete \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='node_modules' \
+              --exclude='dist' \
+              --exclude='dist-server' \
+              --exclude='.env' \
+              --exclude='.env.production' \
+              --exclude='public/uploads/*' \
+              -e "ssh $SSH_OPTS -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
+              ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/" && exit 0
+            echo "Rsync attempt ${attempt} failed; retrying..."
+            sleep 20
+          done
+          exit 1
 
       - name: Write production env on VPS
         run: |
-          ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+          for attempt in 1 2 3; do
+            ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF' && exit 0
             set -e
             cd '${{ env.DEPLOY_PATH }}'
             cat > .env.production << 'ENVEOF'
@@ -122,13 +133,22 @@ jobs:
           ENVEOF
             chmod 600 .env.production
           EOF
+            echo "Write env attempt ${attempt} failed; retrying..."
+            sleep 20
+          done
+          exit 1
 
       - name: Deploy with Docker Compose
         run: |
-          ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+          for attempt in 1 2 3; do
+            ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF' && exit 0
             set -e
             cd '${{ env.DEPLOY_PATH }}'
             docker compose pull postgres caddy || true
             docker compose up -d --build --remove-orphans
             docker compose ps
           EOF
+            echo "Deploy attempt ${attempt} failed; retrying..."
+            sleep 20
+          done
+          exit 1

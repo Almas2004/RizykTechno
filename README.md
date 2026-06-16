@@ -43,6 +43,8 @@ Admin: http://localhost:5173/admin
 
 Workflow: `.github/workflows/deploy.yml`.
 
+The workflow uploads the project to `~/rizyktechno` on the VPS user account and runs Docker Compose there.
+
 Required GitHub repository secrets:
 
 - `VPS_HOST`

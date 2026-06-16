@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-server
+.env
+.env.production
+*.log
+*.tsbuildinfo
+prisma/dev.db
+prisma/dev.db-journal
+public/uploads/*
+deploy/certs/*
+.git

@@ -12,7 +12,7 @@ Production-ready internet store for electronics: React client, catalog, cart, re
 - Product CRUD and product type management
 - JPG, PNG, WebP uploads with file-size limit
 - Rate limit, Helmet, CORS whitelist and strict API validation
-- Docker Compose: app + PostgreSQL + NGINX
+- Docker Compose: app + PostgreSQL + Caddy with automatic HTTPS
 
 ## Local Docker Run
 
@@ -81,7 +81,7 @@ Those commands remove production data.
 
 - `Dockerfile`
 - `docker-compose.yml`
-- `deploy/nginx.conf`
+- `deploy/Caddyfile`
 - `.env.production.example`
 - `ecosystem.config.cjs` for PM2 deployment without Docker
 

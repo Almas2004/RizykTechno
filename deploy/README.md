@@ -2,7 +2,7 @@
 
 1. Create `.env.production` from `.env.production.example`.
 2. Set strong values for `POSTGRES_PASSWORD`, `DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`.
-3. Put TLS certificates into `deploy/certs/fullchain.pem` and `deploy/certs/privkey.pem`, or replace this NGINX setup with Certbot/your hosting provider TLS.
+3. Point your domain DNS A record to the VPS. Caddy will issue and renew Let's Encrypt certificates automatically.
 4. Run:
 
 ```bash

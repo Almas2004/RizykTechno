@@ -95,7 +95,6 @@ jobs:
             --exclude='.env' \
             --exclude='.env.production' \
             --exclude='public/uploads/*' \
-            --exclude='deploy/certs/*' \
             -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
             ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/"
 
@@ -128,7 +127,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
             set -e
             cd '${{ env.DEPLOY_PATH }}'
-            docker compose pull postgres nginx || true
+            docker compose pull postgres caddy || true
             docker compose up -d --build --remove-orphans
             docker compose ps
           EOF

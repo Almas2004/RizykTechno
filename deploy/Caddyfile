@@ -1,0 +1,23 @@
+{
+  email Armaw-91.91@mail.ru
+}
+
+technomarkets.kz, www.technomarkets.kz {
+  encode gzip zstd
+
+  request_body {
+    max_size 10MB
+  }
+
+  reverse_proxy app:4000
+}
+
+:80 {
+  encode gzip zstd
+
+  request_body {
+    max_size 10MB
+  }
+
+  reverse_proxy app:4000
+}

@@ -53,6 +53,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate deploy secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          CLIENT_ORIGIN: ${{ secrets.CLIENT_ORIGIN }}
+        run: |
+          missing=0
+          for name in VPS_HOST VPS_PORT VPS_USER VPS_SSH_KEY POSTGRES_PASSWORD JWT_SECRET ADMIN_EMAIL ADMIN_PASSWORD CLIENT_ORIGIN; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required repository secret: ${name}"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh

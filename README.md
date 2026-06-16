@@ -57,6 +57,8 @@ Required GitHub repository secrets:
 - `ADMIN_PASSWORD`
 - `CLIENT_ORIGIN`
 
+The first four secrets are for SSH access. The remaining five are required for the production app and database. `CLIENT_ORIGIN` should be your production domain, for example `https://example.kz`.
+
 Deploy runs automatically on every push to `main`, and can also be started manually from GitHub Actions.
 
 ## Important About Products

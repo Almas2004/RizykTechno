@@ -53,6 +53,7 @@ const loginSchema = z.object({
 const requestSchema = z.object({
   name: z.string().trim().min(2).max(80),
   phone: z.string().trim().min(7).max(32).regex(/^[\d\s()+-]+$/),
+  deliveryAddress: z.string().trim().min(5).max(300).optional().default(""),
   comment: z.string().trim().max(600).optional().default(""),
   productId: z.coerce.number().int().positive().optional(),
   items: z
@@ -333,6 +334,7 @@ app.post("/api/requests", requestLimiter, async (req, res, next) => {
         data: {
           name: payload.name,
           phone: payload.phone,
+          deliveryAddress: payload.deliveryAddress,
           comment: payload.comment,
           itemsJson: JSON.stringify(cartItems),
           totalAmount
@@ -350,6 +352,7 @@ app.post("/api/requests", requestLimiter, async (req, res, next) => {
       data: {
         name: payload.name,
         phone: payload.phone,
+        deliveryAddress: payload.deliveryAddress,
         comment: payload.comment,
         productId: product.id,
         itemsJson: JSON.stringify([{ productId: product.id, name: product.name, price: product.price, quantity: 1, lineTotal: product.price }]),

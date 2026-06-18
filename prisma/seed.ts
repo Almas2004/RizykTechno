@@ -109,6 +109,7 @@ async function main() {
     create: {
       name: "Айгерим",
       phone: "+7 777 123 45 67",
+      deliveryAddress: "г. Алматы, ул. Абая 10, кв. 15",
       comment: "Интересует доставка на этой неделе.",
       productId: firstProduct.id,
       itemsJson: JSON.stringify([

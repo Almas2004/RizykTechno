@@ -21,6 +21,7 @@ export type LeadRequest = {
   id: number;
   name: string;
   phone: string;
+  deliveryAddress?: string | null;
   comment?: string;
   itemsJson?: string | null;
   totalAmount: number;

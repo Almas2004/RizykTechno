@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Check, MessageCircle, Minus, Plus, Send, ShoppingBag, Trash2 } from "lucide-react";
+import { Check, MessageCircle, Minus, Plus, Send, ShoppingBag, Truck, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api, imageSrc, money } from "../api";
 import { useCart } from "../cart";
@@ -8,7 +8,7 @@ const whatsappNumber = "77756148891";
 
 export default function CartPage() {
   const cart = useCart();
-  const [form, setForm] = useState({ name: "", phone: "", comment: "" });
+  const [form, setForm] = useState({ name: "", phone: "", deliveryAddress: "", comment: "" });
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
 
@@ -18,11 +18,13 @@ export default function CartPage() {
       "",
       ...cart.items.map((item, index) => `${index + 1}. ${item.product.name} x ${item.quantity} - ${money(item.product.price * item.quantity)}`),
       "",
-      `Итого: ${money(cart.total)}`
-    ];
+      `Итого: ${money(cart.total)}`,
+      form.deliveryAddress ? `Адрес доставки: ${form.deliveryAddress}` : "",
+      "Срок доставки: от 7 до 14 дней"
+    ].filter(Boolean);
 
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(lines.join("\n"))}`;
-  }, [cart.items, cart.total]);
+  }, [cart.items, cart.total, form.deliveryAddress]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -34,12 +36,13 @@ export default function CartPage() {
       body: JSON.stringify({
         name: form.name,
         phone: form.phone,
+        deliveryAddress: form.deliveryAddress,
         comment: form.comment,
         items: cart.items.map((item) => ({ productId: item.product.id, quantity: item.quantity }))
       })
     });
     cart.clearCart();
-    setForm({ name: "", phone: "", comment: "" });
+    setForm({ name: "", phone: "", deliveryAddress: "", comment: "" });
     setSent(true);
     setSending(false);
   }
@@ -49,8 +52,10 @@ export default function CartPage() {
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="text-sm font-semibold text-accent">Корзина</p>
-          <h1 className="mt-2 text-4xl font-semibold">Проверьте заказ и выберите способ отправки</h1>
-          <p className="mt-4 max-w-2xl text-muted">Можно отправить заявку через сайт или сразу передать состав корзины в WhatsApp без заполнения формы.</p>
+          <h1 className="mt-2 text-4xl font-semibold">Проверьте заказ и укажите адрес доставки</h1>
+          <p className="mt-4 max-w-2xl text-muted">
+            Заявку можно отправить через сайт или сразу передать состав корзины в WhatsApp.
+          </p>
         </div>
         <Link className="btn btn-light" to="/catalog">
           Продолжить покупки
@@ -114,7 +119,7 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between text-muted">
                 <span>Доставка</span>
-                <span>Уточнит менеджер</span>
+                <span>от 7 до 14 дней</span>
               </div>
               <div className="flex justify-between text-lg font-semibold text-ink">
                 <span>Сумма</span>
@@ -122,9 +127,15 @@ export default function CartPage() {
               </div>
             </div>
 
+            <div className="mt-5 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              <Truck className="mt-0.5 shrink-0" size={18} />
+              <p>Доставка осуществляется от 7 до 14 дней после подтверждения заказа менеджером.</p>
+            </div>
+
             <div className="mt-5 grid gap-3">
               <input className="input" required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Ваше имя" />
               <input className="input" required value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="Телефон" />
+              <textarea className="input min-h-24 resize-none" required value={form.deliveryAddress} onChange={(event) => setForm({ ...form, deliveryAddress: event.target.value })} placeholder="Адрес доставки" />
               <textarea className="input min-h-24 resize-none" value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} placeholder="Комментарий к заказу" />
             </div>
 

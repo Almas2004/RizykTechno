@@ -278,7 +278,7 @@ export default function AdminPage() {
                 <Layers3 className="text-accent" size={22} />
                 <h2 className="text-xl font-semibold">Добавить тип товара</h2>
               </div>
-              <p className="mt-3 text-sm leading-6 text-muted">Типы нужны менеджеру для структуры каталога. На сайте для клиента они не показываются.</p>
+              <p className="mt-3 text-sm leading-6 text-muted">Типы нужны менеджеру для структуры каталога. На сайте для клиента они не показываются отдельным блоком.</p>
               <input className="input mt-5" required value={categoryName} onChange={(event) => setCategoryName(event.target.value)} placeholder="Например: Смартфоны" />
               <button className="btn btn-dark mt-5 w-full justify-center" type="submit">
                 <Save size={18} /> Добавить тип
@@ -309,6 +309,7 @@ export default function AdminPage() {
                   <tr>
                     <th className="px-4 py-3">Клиент</th>
                     <th className="px-4 py-3">Телефон</th>
+                    <th className="px-4 py-3">Адрес доставки</th>
                     <th className="px-4 py-3">Состав заказа</th>
                     <th className="px-4 py-3">Сумма</th>
                     <th className="px-4 py-3">Комментарий</th>
@@ -322,6 +323,7 @@ export default function AdminPage() {
                       <tr key={request.id} className="align-top">
                         <td className="px-4 py-3 font-medium">{request.name}</td>
                         <td className="px-4 py-3">{request.phone}</td>
+                        <td className="max-w-xs px-4 py-3 text-muted">{request.deliveryAddress || "-"}</td>
                         <td className="px-4 py-3 text-muted">
                           <div className="space-y-1">
                             {items.map((item, index) => (

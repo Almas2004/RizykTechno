@@ -16,6 +16,7 @@ services:
       retries: 5
 
   app:
+    image: rizyktechno-app:latest
     build:
       context: .
       args:

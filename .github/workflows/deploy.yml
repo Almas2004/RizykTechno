@@ -91,17 +91,7 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -T 30 -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts || true
 
-      - name: Prepare deploy directory
-        run: |
-          for attempt in 1 2 3; do
-            ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-              "mkdir -p '${{ env.DEPLOY_PATH }}'" && exit 0
-            echo "SSH prepare attempt ${attempt} failed; retrying..."
-            sleep 20
-          done
-          exit 1
-
-      - name: Upload project
+      - name: Upload project and Docker image
         run: |
           for attempt in 1 2 3; do
             rsync -az --delete \
@@ -112,8 +102,8 @@ jobs:
               --exclude='dist-server' \
               --exclude='.env' \
               --exclude='.env.production' \
-              --exclude='rizyktechno-app.tar.gz' \
               --exclude='public/uploads/*' \
+              --rsync-path="mkdir -p '${{ env.DEPLOY_PATH }}' && rsync" \
               -e "ssh $SSH_OPTS -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
               ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/" && exit 0
             echo "Rsync attempt ${attempt} failed; retrying..."
@@ -121,18 +111,7 @@ jobs:
           done
           exit 1
 
-      - name: Upload Docker image
-        run: |
-          for attempt in 1 2 3; do
-            rsync -az \
-              -e "ssh $SSH_OPTS -i ~/.ssh/deploy_key -p ${{ secrets.VPS_PORT }}" \
-              rizyktechno-app.tar.gz "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_PATH }}/rizyktechno-app.tar.gz" && exit 0
-            echo "Image upload attempt ${attempt} failed; retrying..."
-            sleep 20
-          done
-          exit 1
-
-      - name: Write production env on VPS
+      - name: Write env and deploy with Docker Compose
         run: |
           for attempt in 1 2 3; do
             ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF' && exit 0
@@ -155,18 +134,6 @@ jobs:
           VITE_STORE_EMAIL=Armaw-91.91@mail.ru
           ENVEOF
             chmod 600 .env.production
-          EOF
-            echo "Write env attempt ${attempt} failed; retrying..."
-            sleep 20
-          done
-          exit 1
-
-      - name: Deploy with Docker Compose
-        run: |
-          for attempt in 1 2 3; do
-            ssh $SSH_OPTS -i ~/.ssh/deploy_key -p "${{ secrets.VPS_PORT }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF' && exit 0
-            set -e
-            cd '${{ env.DEPLOY_PATH }}'
             docker compose pull postgres caddy || true
             docker load -i rizyktechno-app.tar.gz
             docker compose up -d --no-build --remove-orphans
